@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Biroor Arama Motoru</title>
+  <link rel="icon" type="image/png" href="2.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --page-bg: #f2f5fb;
+      --surface: rgba(255, 255, 255, 0.78);
+      --surface-strong: rgba(255, 255, 255, 0.9);
+      --border: rgba(148, 163, 184, 0.4);
+      --text: #0f172a;
+      --muted: #64748b;
+      --accent: #2563eb;
+      --accent-2: #7c3aed;
+      --shadow: 0 22px 50px rgba(15, 23, 42, 0.16);
+      --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.12);
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background: var(--page-bg);
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      transition: background 0.5s ease;
+    }
+
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(1200px 600px at 10% 0%, rgba(59, 130, 246, 0.18), transparent 60%),
+        radial-gradient(1200px 600px at 90% 10%, rgba(124, 58, 237, 0.18), transparent 55%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.25));
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .top-bar {
+      width: min(1100px, 92vw);
+      margin: 22px auto 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 20px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 12px 24px rgba(37, 99, 235, 0.35);
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .brand-sub {
+      margin-top: 2px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    #topMenuButton {
+      border: 1px solid var(--border);
+      background: var(--surface-strong);
+      color: var(--text);
+      padding: 10px 16px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    #topMenuButton:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+      background: #fff;
+    }
+
+    .main {
+      width: min(1100px, 92vw);
+      margin: 40px auto 70px;
+      display: grid;
+      gap: 24px;
+    }
+
+    .hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #1e293b;
+      background: rgba(37, 99, 235, 0.12);
+    }
+
+    .hero h1 {
+      margin: 16px 0 10px;
+      font-size: clamp(28px, 4vw, 42px);
+      line-height: 1.1;
+    }
+
+    .hero p {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .search-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface-strong);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      padding: 14px 16px;
+      font-size: 16px;
+      color: var(--text);
+    }
+
+    .search-input::placeholder {
+      color: #94a3b8;
+    }
+
+    #searchBtn {
+      border: none;
+      padding: 12px 22px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 15px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.35);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    #searchBtn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 30px rgba(37, 99, 235, 0.4);
+    }
+
+    .hint {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .quick-links {
+      margin-top: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .quick-link {
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .quick-link:hover {
+      transform: translateY(-1px);
+      background: #fff;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .quick-link.ghost {
+      background: transparent;
+    }
+
+    .results-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      display: none;
+    }
+
+    .plugins-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      display: grid;
+      gap: 14px;
+    }
+
+    .plugins-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .plugins-link {
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .plugins-link:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .plugins-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .plugin-item {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .plugin-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .plugin-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .plugin-meta {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .plugin-desc {
+      margin: 0;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .plugin-controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .plugin-btn {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .plugin-btn.primary {
+      border: none;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    }
+
+    .plugin-btn.danger {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.35);
+      color: #b91c1c;
+    }
+
+    .plugin-note {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .results-header h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    #resultsCount {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.2);
+    }
+
+    .results {
+      display: grid;
+      gap: 12px;
+    }
+
+    .result-item {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .result-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .result-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .result-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.4);
+    }
+
+    .result-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .result-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .result-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.12);
+      border: 1px solid rgba(37, 99, 235, 0.25);
+      color: #1e293b;
+    }
+
+    .result-badge--math {
+      background: rgba(34, 197, 94, 0.18);
+      border-color: rgba(34, 197, 94, 0.35);
+      color: #14532d;
+    }
+
+    .result-badge--brand {
+      background: rgba(14, 165, 233, 0.16);
+      border-color: rgba(14, 165, 233, 0.35);
+      color: #0c4a6e;
+    }
+
+    .result-title:hover {
+      text-decoration: underline;
+    }
+
+    .result-url {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .result-desc {
+      margin: 0;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .notice {
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      background: rgba(59, 130, 246, 0.12);
+      color: #1e293b;
+      border: 1px dashed rgba(59, 130, 246, 0.3);
+      font-weight: 600;
+    }
+
+    .result-empty {
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      background: rgba(15, 23, 42, 0.05);
+      color: #1e293b;
+      border: 1px dashed rgba(148, 163, 184, 0.45);
+    }
+
+    #topMenuPanel {
+      position: fixed;
+      top: 76px;
+      right: 24px;
+      width: 240px;
+      background: var(--surface-strong);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow);
+      padding: 10px;
+      display: none;
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      z-index: 9999;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      transition: background 0.2s ease;
+      color: var(--text);
+    }
+
+    .menu-item:hover {
+      background: rgba(15, 23, 42, 0.06);
+    }
+
+    .menu-icon {
+      font-size: 16px;
+    }
+
+    .menu-icon-img {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+    }
+
+    #calculatorPanel {
+      position: fixed;
+      top: 110px;
+      right: 24px;
+      width: 320px;
+      background: var(--surface-strong);
+      backdrop-filter: blur(16px);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      display: none;
+      animation: fadeIn 0.25s ease;
+      z-index: 10000;
+      border: 1px solid var(--border);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #calcScreen {
+      width: 100%;
+      height: 64px;
+      font-size: 30px;
+      border-radius: 14px;
+      border: none;
+      background: rgba(255, 255, 255, 0.7);
+      box-shadow: inset 0 2px 6px rgba(15, 23, 42, 0.2);
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .calc-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .calc-btn {
+      flex: 1;
+      padding: 14px 0;
+      background: rgba(241, 245, 249, 0.9);
+      font-size: 18px;
+      border: none;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+    }
+
+    .calc-btn:active {
+      transform: scale(0.96);
+    }
+
+    .calc-op { background: #f59e0b; color: #fff; }
+    .calc-eq { background: #22c55e; color: #fff; }
+    .calc-clear { background: #ef4444; color: #fff; }
+    .calc-zero { flex: 2; }
+
+  
+    .theme-panel {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+    }
+
+    .theme-options {
+      display: none;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 280px;
+      max-height: 360px;
+      overflow-y: auto;
+      background: var(--surface-strong);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+    }
+
+    .theme-item {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      border-radius: 12px;
+      transition: background 0.2s ease;
+      gap: 10px;
+    }
+
+    .theme-item:hover {
+      background: rgba(15, 23, 42, 0.06);
+    }
+
+    .theme-preview {
+      width: 44px;
+      height: 32px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    @media (max-width: 820px) {
+      .top-bar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .search-card {
+        flex-direction: column;
+        align-items: stretch;
+        border-radius: var(--radius-md);
+      }
+
+      #searchBtn {
+        width: 100%;
+      }
+
+      #topMenuPanel,
+      #calculatorPanel {
+        right: 16px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .hero {
+        padding: 24px;
+      }
+
+      .brand-sub {
+        display: none;
+      }
+    }
+  </style>
+
+  <script src="1.js"></script>
+</head>
+<body>
+  <div class="bg-overlay"></div>
+
+  <div class="page">
+    <header class="top-bar">
+      <div class="brand">
+        <div class="brand-mark">B</div>
+        <div>
+          <div class="brand-name">Biroor</div>
+          <div class="brand-sub">Akıllı arama motoru</div>
+        </div>
+      </div>
+      <button id="topMenuButton" aria-haspopup="true" aria-expanded="false">☰ Menü</button>
+    </header>
+
+    <main class="main">
+      <section class="hero">
+        <span class="pill">Biroor</span>
+        <h1>Tek arama tüm favorilerin</h1>
+        <p>Hızlı erişim temiz tasarım ve güçlü arama hepsi Biroorda</p>
+
+        <div class="search-card">
+          <input type="text" id="searchInput" class="search-input" placeholder="Arama yapın..." />
+          <button id="searchBtn" onclick="performSearch()">Ara</button>
+        </div>
+
+        <div class="quick-links">
+          <button class="quick-link ghost" onclick="openThemeMenu()">🎨 Tema Seç</button>
+          <button class="quick-link ghost" onclick="openCalculator()">🧮 Hesap Makinesi</button>
+          <a class="quick-link ghost" href="add-site.php" target="_blank">➕ Site Ekle</a>
+          <a class="quick-link ghost" href="add-brand.php" target="_blank">➕ Marka Ekle</a>
+          <a class="quick-link ghost" href="store.php" target="_blank">🧩 Eklenti Mağazası</a>
+        </div>
+      </section>
+
+      <section class="results-card" id="resultsSection">
+        <div class="results-header">
+          <h2>Sonuçlar</h2>
+          <span id="resultsCount">0</span>
+        </div>
+        <div class="results" id="results"></div>
+      </section>
+
+      <section class="plugins-card" id="pluginsSection">
+        <div class="results-header">
+          <h2>Eklentiler</h2>
+          <span id="pluginsCount">0</span>
+        </div>
+        <div class="plugins-actions">
+          <a class="plugins-link" href="store.php" target="_blank">🧩 Eklenti Mağazası</a>
+          <a class="plugins-link" href="add-plugin.php" target="_blank">➕ Eklenti Ekle</a>
+        </div>
+        <div class="plugins-list" id="pluginsList"></div>
+        <div class="result-empty" id="pluginsEmpty" style="display:none;">Henüz eklenti yüklenmedi.</div>
+        <div class="plugin-note">JS eklentileri kapatılsa bile etkisi kalabilir, gerekirse sayfayı yenileyin.</div>
+      </section>
+    </main>
+  </div>
+
+  <div id="topMenuPanel">
+    <div class="menu-item" onclick="window.location.href='https://youtube.com'">
+      <span class="menu-icon">▶</span> YouTube
+    </div>
+    <div class="menu-item" onclick="window.open('https://biroorgames.netlify.app/', '_blank')">
+      <img src="favicon.png" alt="Biroor" class="menu-icon-img" /> Oyunlar
+    </div>
+    <div class="menu-item" onclick="window.open('https://biroormaps.netlify.app/', '_blank')">
+      <img src="logo.png" alt="Biroor Haritalar" class="menu-icon-img" /> Haritalar
+    </div>
+    <div class="menu-item" onclick="openThemeMenu()">🎨 Tema Seç</div>
+    <div class="menu-item" onclick="openCalculator()">🧮 Hesap Makinesi</div>
+    <div class="menu-item" onclick="window.open('add-site.php', '_blank')">➕ Site Ekle</div>
+    <div class="menu-item" onclick="window.open('add-brand.php', '_blank')">➕ Marka Ekle</div>
+    <div class="menu-item" onclick="window.open('store.php', '_blank')">🧩 Eklenti Mağazası</div>
+  </div>
+
+  <div class="theme-panel">
+    <div id="themeOptions" class="theme-options"></div>
+  </div>
+
+  <div id="calculatorPanel">
+    <input type="text" id="calcScreen" readonly />
+    <div class="calc-row">
+      <button class="calc-btn calc-clear" onclick="clearCalc()">C</button>
+      <button class="calc-btn calc-op" onclick="calcAdd('/')">÷</button>
+      <button class="calc-btn calc-op" onclick="calcAdd('*')">×</button>
+      <button class="calc-btn calc-op" onclick="calcAdd('-')">−</button>
+    </div>
+    <div class="calc-row">
+      <button class="calc-btn" onclick="calcAdd('7')">7</button>
+      <button class="calc-btn" onclick="calcAdd('8')">8</button>
+      <button class="calc-btn" onclick="calcAdd('9')">9</button>
+      <button class="calc-btn calc-op" onclick="calcAdd('+')">+</button>
+    </div>
+    <div class="calc-row">
+      <button class="calc-btn" onclick="calcAdd('4')">4</button>
+      <button class="calc-btn" onclick="calcAdd('5')">5</button>
+      <button class="calc-btn" onclick="calcAdd('6')">6</button>
+      <button class="calc-btn calc-eq" onclick="calcEquals()">=</button>
+    </div>
+    <div class="calc-row">
+      <button class="calc-btn" onclick="calcAdd('1')">1</button>
+      <button class="calc-btn" onclick="calcAdd('2')">2</button>
+      <button class="calc-btn" onclick="calcAdd('3')">3</button>
+      <button class="calc-btn calc-clear" onclick="closeCalculator()">Kapat</button>
+    </div>
+    <div class="calc-row">
+      <button class="calc-btn calc-zero" onclick="calcAdd('0')">0</button>
+      <button class="calc-btn" onclick="calcAdd('.')">.</button>
+      <button class="calc-btn calc-eq" onclick="calcEquals()">=</button>
+    </div>
+  </div>
+
+  <script>
+  
+    if (typeof window.siteData === "undefined" || !Array.isArray(window.siteData)) {
+      console.warn("siteData 1.js dosyasından yüklenemedi. Yedek veri kullanılıyor.");
+      window.siteData = [
+        { title: "YouTube", description: "Video paylaşım sitesi", url: "https://youtube.com" },
+        { title: "Instagram", description: "Fotoğraf ve sosyal medya", url: "https://instagram.com" },
+        { title: "Haritalar", description: "Biroor haritalar servisi", url: "https://biroormaps.netlify.app/" },
+        { title: "Örnek", description: "Başlıksız örnek", url: "https://example.com" }
+      ];
+    }
+
+  
+    const topMenuButton = document.getElementById("topMenuButton");
+    topMenuButton.onclick = () => {
+      const panel = document.getElementById("topMenuPanel");
+      const isOpen = panel.style.display === "block";
+      panel.style.display = isOpen ? "none" : "block";
+      topMenuButton.setAttribute("aria-expanded", String(!isOpen));
+      document.getElementById("calculatorPanel").style.display = "none";
+      document.getElementById("themeOptions").style.display = "none";
+    };
+
+  
+    function openCalculator() {
+      document.getElementById("topMenuPanel").style.display = "none";
+      document.getElementById("themeOptions").style.display = "none";
+      document.getElementById("calculatorPanel").style.display = "block";
+    }
+    function closeCalculator() { document.getElementById("calculatorPanel").style.display = "none"; }
+    function calcAdd(v) { document.getElementById("calcScreen").value += v; }
+
+    function calcEquals() {
+      const expression = document.getElementById("calcScreen").value;
+      if (!/^[0-9+\-*/.()]+$/.test(expression)) {
+        document.getElementById("calcScreen").value = "Hata!";
+        return;
+      }
+
+      try {
+        const result = new Function("return " + expression)();
+        document.getElementById("calcScreen").value = result;
+      } catch {
+        document.getElementById("calcScreen").value = "Hata!";
+      }
+    }
+    function clearCalc() { document.getElementById("calcScreen").value = ""; }
+
+   
+    const themes = {
+      normal: { label: "Minimal", bg: "#f2f5fb" },
+      doga: { label: "Doğa", bg: "url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80')" },
+      uzay: { label: "Uzay", bg: "url('https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1600&q=80')" },
+      sahil: { label: "Sahil", bg: "url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80')" },
+      sehir: { label: "Şehir", bg: "url('https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1600&q=80')" },
+      ofis: { label: "Ofis", bg: "url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1600&q=80')" },
+      col: { label: "Çöl", bg: "url('https://cdn.pixabay.com/photo/2016/09/08/13/58/desert-1654439_1280.jpg')" },
+      orman: { label: "Orman", bg: "url('https://cdn.pixabay.com/photo/2018/03/02/19/21/nature-3194001_1280.jpg')" },
+      dag1: { label: "Dağ 1", bg: "url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1600&q=80')" },
+      dag2: { label: "Dağ 2", bg: "url('https://cdn.pixabay.com/photo/2021/01/21/21/48/mountain-ranges-5938639_1280.jpg')" },
+      gunbatimi: { label: "Gün Batımı", bg: "url('https://cdn.pixabay.com/photo/2017/08/01/00/55/sea-2569234_1280.jpg')" }
+    };
+
+    const legacyMap = {
+      "doÄŸa": "doga",
+      "uzay": "uzay",
+      "sahil": "sahil",
+      "bina": "sehir",
+      "ofis": "ofis",
+      "Ã§Ã¶l": "col",
+      "orman": "orman",
+      "daÄŸ1": "dag1",
+      "daÄŸ2": "dag2",
+      "Gideros": "gunbatimi"
+    };
+
+    function applyTheme(themeKey) {
+      const theme = themes[themeKey] || themes.normal;
+      document.body.style.background = theme.bg;
+      const isImage = typeof theme.bg === "string" && theme.bg.startsWith("url");
+      document.body.classList.toggle("theme-image", isImage);
+    }
+
+    function openThemeMenu() {
+      document.getElementById("topMenuPanel").style.display = "none";
+      const panel = document.getElementById("themeOptions");
+      panel.style.display = panel.style.display === "block" ? "none" : "block";
+    }
+
+    const themeOptions = document.getElementById("themeOptions");
+    Object.keys(themes).forEach(themeKey => {
+      const theme = themes[themeKey];
+      const item = document.createElement("div");
+      item.className = "theme-item";
+
+      const preview = document.createElement("div");
+      preview.className = "theme-preview";
+      if (typeof theme.bg === "string" && theme.bg.startsWith("url")) {
+        preview.style.backgroundImage = theme.bg;
+      } else {
+        preview.style.backgroundColor = theme.bg;
+      }
+
+      const label = document.createElement("span");
+      label.textContent = theme.label || themeKey;
+
+      item.appendChild(preview);
+      item.appendChild(label);
+
+      item.onmouseenter = () => applyTheme(themeKey);
+      item.onmouseleave = () => {
+        const saved = localStorage.getItem("selectedTheme") || "normal";
+        applyTheme(saved);
+      };
+
+      item.onclick = () => {
+        localStorage.setItem("selectedTheme", themeKey);
+        applyTheme(themeKey);
+        themeOptions.style.display = "none";
+      };
+
+      themeOptions.appendChild(item);
+    });
+
+    window.addEventListener("load", () => {
+      const saved = localStorage.getItem("selectedTheme") || "normal";
+      const mapped = legacyMap[saved] || saved;
+      applyTheme(mapped);
+      localStorage.setItem("selectedTheme", mapped);
+    });
+
+    const PLUGIN_STORAGE_KEY = "biroor_plugins";
+    const pluginsList = document.getElementById("pluginsList");
+    const pluginsCount = document.getElementById("pluginsCount");
+    const pluginsEmpty = document.getElementById("pluginsEmpty");
+
+    function normalizePluginId(value) {
+      return String(value || "").toLowerCase().replace(/[^a-z0-9_-]/g, "-");
+    }
+
+    function getStoredPlugins() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(PLUGIN_STORAGE_KEY));
+        if (!Array.isArray(parsed)) return [];
+        return parsed.map(item => ({
+          ...item,
+          enabled: item?.enabled !== false
+        }));
+      } catch {
+        return [];
+      }
+    }
+
+    function saveStoredPlugins(list) {
+      localStorage.setItem(PLUGIN_STORAGE_KEY, JSON.stringify(list));
+    }
+
+    function syncPluginEffects(list) {
+      const ids = new Set(list.map(plugin => normalizePluginId(plugin.id)));
+      document.querySelectorAll("[data-plugin-id]").forEach(el => {
+        const id = el.getAttribute("data-plugin-id");
+        if (!ids.has(id)) {
+          el.remove();
+        }
+      });
+
+      list.forEach(plugin => {
+        const id = normalizePluginId(plugin.id);
+        if (!id) return;
+        const type = plugin.type === "js" ? "js" : "css";
+        const enabled = plugin.enabled !== false;
+
+        if (type === "css") {
+          let style = document.querySelector(`style[data-plugin-id="${id}"]`);
+          if (!enabled) {
+            if (style) style.remove();
+            return;
+          }
+          if (!style) {
+            style = document.createElement("style");
+            style.setAttribute("data-plugin-id", id);
+            document.head.appendChild(style);
+          }
+          style.textContent = String(plugin.code || "");
+        } else {
+          let script = document.querySelector(`script[data-plugin-id="${id}"]`);
+          if (!enabled) {
+            if (script) script.remove();
+            return;
+          }
+          if (!script) {
+            script = document.createElement("script");
+            script.setAttribute("data-plugin-id", id);
+            script.text = String(plugin.code || "");
+            document.body.appendChild(script);
+          }
+        }
+      });
+    }
+
+    function setPlugins(list) {
+      saveStoredPlugins(list);
+      syncPluginEffects(list);
+      renderPlugins(list);
+    }
+
+    function renderPlugins(list) {
+      const items = Array.isArray(list) ? list : getStoredPlugins();
+      pluginsList.innerHTML = "";
+      pluginsCount.textContent = String(items.length);
+      pluginsEmpty.style.display = items.length ? "none" : "block";
+
+      items.forEach(plugin => {
+        const item = document.createElement("div");
+        item.className = "plugin-item";
+
+        const top = document.createElement("div");
+        top.className = "plugin-top";
+
+        const info = document.createElement("div");
+
+        const title = document.createElement("h3");
+        title.className = "plugin-title";
+        title.textContent = plugin.name || plugin.id || "Eklenti";
+
+        const meta = document.createElement("div");
+        meta.className = "plugin-meta";
+        if (plugin.type) {
+          const typeTag = document.createElement("span");
+          typeTag.textContent = plugin.type.toUpperCase();
+          meta.appendChild(typeTag);
+        }
+        if (plugin.version) {
+          const versionTag = document.createElement("span");
+          versionTag.textContent = `v${plugin.version}`;
+          meta.appendChild(versionTag);
+        }
+        if (plugin.author) {
+          const authorTag = document.createElement("span");
+          authorTag.textContent = plugin.author;
+          meta.appendChild(authorTag);
+        }
+
+        info.appendChild(title);
+        info.appendChild(meta);
+
+        const controls = document.createElement("div");
+        controls.className = "plugin-controls";
+
+        const toggleBtn = document.createElement("button");
+        toggleBtn.className = "plugin-btn primary";
+        toggleBtn.textContent = plugin.enabled ? "Açık" : "Kapalı";
+        toggleBtn.onclick = () => {
+          const next = items.map(entry => {
+            if (entry.id === plugin.id) {
+              return { ...entry, enabled: !entry.enabled };
+            }
+            return entry;
+          });
+          setPlugins(next);
+        };
+
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "plugin-btn danger";
+        removeBtn.textContent = "Kaldır";
+        removeBtn.onclick = () => {
+          const next = items.filter(entry => entry.id !== plugin.id);
+          setPlugins(next);
+        };
+
+        controls.appendChild(toggleBtn);
+        controls.appendChild(removeBtn);
+
+        top.appendChild(info);
+        top.appendChild(controls);
+
+        const desc = document.createElement("p");
+        desc.className = "plugin-desc";
+        desc.textContent = plugin.description || "Açıklama yok.";
+
+        item.appendChild(top);
+        item.appendChild(desc);
+        pluginsList.appendChild(item);
+      });
+    }
+
+    const initialPlugins = getStoredPlugins();
+    syncPluginEffects(initialPlugins);
+    renderPlugins(initialPlugins);
+
+   
+    const resultsSection = document.getElementById("resultsSection");
+    const resultsCount = document.getElementById("resultsCount");
+    const searchInput = document.getElementById("searchInput");
+
+    searchInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        performSearch();
+      }
+    });
+
+    searchInput.addEventListener("input", () => {
+      if (!searchInput.value.trim()) {
+        resultsSection.style.display = "none";
+        document.getElementById("results").innerHTML = "";
+        resultsCount.textContent = "0";
+      }
+    });
+
+    function isLikelyMathQuestion(rawQuery) {
+      const q = String(rawQuery || "");
+      return /[0-9]/.test(q) && /[+\-*/×÷]/.test(q);
+    }
+
+    function extractMathExpression(rawQuery) {
+      if (!rawQuery) return null;
+      let q = String(rawQuery).toLowerCase();
+      const equalIndex = q.indexOf("=");
+      if (equalIndex !== -1) {
+        q = q.slice(0, equalIndex);
+      }
+      q = q.replace(/(kaçtır|kaç|nedir|ne kadar|sonuç|sonucu|hesapla)/g, " ");
+      q = q.replace(/[?]/g, " ");
+      q = q.replace(/,/g, ".");
+      q = q.replace(/[x×]/g, "*");
+      q = q.replace(/[÷]/g, "/");
+      q = q.replace(/\s+/g, "");
+      if (!q) return null;
+      if (!/^[0-9+\-*/().]+$/.test(q)) return null;
+      if (!/[0-9]/.test(q)) return null;
+      return q;
+    }
+
+    function safeMathEval(expression) {
+      if (!expression || !/^[0-9+\-*/().]+$/.test(expression)) return null;
+      try {
+        const value = new Function("return " + expression)();
+        if (typeof value !== "number" || !Number.isFinite(value)) {
+          return null;
+        }
+        return value;
+      } catch {
+        return null;
+      }
+    }
+
+    function formatMathResult(value) {
+      const rounded = Math.round((value + Number.EPSILON) * 1e10) / 1e10;
+      return String(rounded);
+    }
+
+    function buildMathResult(rawQuery) {
+      if (!isLikelyMathQuestion(rawQuery)) return null;
+      const expression = extractMathExpression(rawQuery);
+      if (!expression) return null;
+      const value = safeMathEval(expression);
+      if (value === null) return null;
+      const displayExpression = expression.replace(/\*/g, "×").replace(/\//g, "÷");
+      const formatted = formatMathResult(value);
+      return {
+        title: "Matematik Sonucu",
+        description: `${displayExpression} = ${formatted}`,
+        url: "",
+        icon: "https://cdn-icons-png.flaticon.com/512/564/564429.png",
+        type: "math",
+        badge: "Hesaplama",
+        domain: "Hesaplama"
+      };
+    }
+
+    function performSearch() {
+      const rawQuery = (searchInput.value || "").trim();
+      const query = rawQuery.toLowerCase();
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
+
+      if (!query) {
+        resultsSection.style.display = "none";
+        resultsCount.textContent = "0";
+        return;
+      }
+
+      resultsSection.style.display = "block";
+
+      if (query.includes("google")) {
+        const notice = document.createElement("div");
+        notice.className = "notice";
+        notice.textContent = "O amcaya değil, bizim yerlimize bak!";
+        resultsDiv.appendChild(notice);
+      }
+
+      const data = Array.isArray(window.siteData) ? window.siteData : [];
+      const mathResult = buildMathResult(rawQuery);
+
+      const scored = data.map(item => {
+        const title = String(item?.title ?? "");
+        const description = String(item?.description ?? "");
+        const keywords = Array.isArray(item?.keywords) ? item.keywords.join(" ") : "";
+
+        const titleScore = scoreMatch(title, query);
+        const descScore = scoreMatch(description, query);
+        const keyScore = scoreMatch(keywords, query);
+        const score = Math.max(titleScore * 3, descScore * 2, keyScore);
+        const brandBoost = item?.type === "brand" && (titleScore > 0 || descScore > 0 || keyScore > 0) ? 2 : 0;
+        return { item, score: score + brandBoost };
+      }).filter(entry => entry.score > 0);
+
+      scored.sort((a, b) => b.score - a.score);
+
+      const filtered = scored.map(entry => entry.item);
+
+      const finalResults = [];
+      if (mathResult) finalResults.push(mathResult);
+      finalResults.push(...filtered);
+
+      resultsCount.textContent = String(finalResults.length);
+
+      if (finalResults.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "result-empty";
+        empty.textContent = "Sonuç bulunamadı.";
+        resultsDiv.appendChild(empty);
+        logZeroResult(rawQuery);
+        return;
+      }
+
+      finalResults.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "result-item";
+
+        let domain = item?.domain ? String(item.domain) : "";
+        if (!domain && item && item.url) {
+          try {
+            domain = new URL(item.url).hostname;
+          } catch (e) {
+            domain = "";
+          }
+        }
+        if (!domain) {
+          domain = item?.type === "math" ? "Hesaplama" : "Biroor";
+        }
+
+        const logoUrl = item?.logo || item?.icon || `https://www.google.com/s2/favicons?domain=${domain}`;
+        const title = item?.title ? item.title : "Başlıksız";
+        const desc = item?.description ? item.description : "";
+        const badge = item?.badge || (item?.type === "brand" ? "Resmi Site" : item?.type === "math" ? "Hesaplama" : "");
+        const badgeClass = item?.type === "math"
+          ? "result-badge result-badge--math"
+          : item?.type === "brand"
+            ? "result-badge result-badge--brand"
+            : "result-badge";
+        const titleHtml = item?.url
+          ? `<a class="result-title" href="${item.url}" target="_blank" rel="noreferrer noopener">${escapeHtml(title)}</a>`
+          : `<span class="result-title">${escapeHtml(title)}</span>`;
+        const badgeHtml = badge ? `<span class="${badgeClass}">${escapeHtml(badge)}</span>` : "";
+
+        div.innerHTML = `
+          <div class="result-head">
+            <img class="result-icon" src="${logoUrl}" alt="" />
+            <div>
+              <div class="result-title-row">
+                ${titleHtml}
+                ${badgeHtml}
+              </div>
+              <div class="result-url">${domain}</div>
+            </div>
+          </div>
+          <p class="result-desc">${escapeHtml(desc)}</p>
+        `;
+
+        resultsDiv.appendChild(div);
+      });
+    }
+
+    function scoreMatch(text, query) {
+      const lower = String(text).toLowerCase();
+      if (!lower) return 0;
+      if (lower === query) return 3;
+      if (lower.startsWith(query)) return 2;
+      if (lower.includes(query)) return 1;
+      return 0;
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, function (m) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m];
+      });
+    }
+
+    function logZeroResult(query) {
+      const trimmed = String(query || "").trim();
+      if (!trimmed) return;
+      fetch("log-zero.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+        },
+        body: new URLSearchParams({ query: trimmed })
+      }).catch(() => {});
+    }
+
+    function loadVeriEntries() {
+      fetch("veri.txt", { cache: "no-store" })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("veri.txt unavailable");
+          }
+          return response.text();
+        })
+        .then(text => {
+          const lines = text.split(/\r?\n/);
+          const extra = [];
+          lines.forEach(line => {
+            const trimmed = line.trim();
+            if (!trimmed) {
+              return;
+            }
+            try {
+              const parsed = JSON.parse(trimmed);
+              if (!parsed.title || !parsed.url) {
+                return;
+              }
+              extra.push({
+                title: String(parsed.title),
+                url: String(parsed.url),
+                description: String(parsed.description || ""),
+                keywords: Array.isArray(parsed.keywords) ? parsed.keywords : [],
+                icon: parsed.icon || ""
+              });
+            } catch {
+              // ignore invalid JSON
+            }
+          });
+          if (extra.length) {
+            window.siteData = (window.siteData || []).concat(extra);
+          }
+        })
+        .catch(() => {});
+    }
+
+    let phpDataLoaded = false;
+
+    function loadPhpData() {
+      if (phpDataLoaded) return;
+      phpDataLoaded = true;
+      fetch("data.php", { cache: "no-store" })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("data.php unavailable");
+          }
+          return response.json();
+        })
+        .then(list => {
+          if (Array.isArray(list) && list.length) {
+            window.siteData = (window.siteData || []).concat(list);
+          }
+        })
+        .catch(() => {
+          loadVeriEntries();
+        });
+    }
+
+    loadPhpData();
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        document.getElementById("topMenuPanel").style.display = "none";
+        document.getElementById("themeOptions").style.display = "none";
+        document.getElementById("calculatorPanel").style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>
